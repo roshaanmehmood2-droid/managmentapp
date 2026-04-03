@@ -14,12 +14,18 @@ void main() async {
   tz.initializeTimeZones();
 
   try {
-    // In flutter_timezone ^5.0.2, getLocalTimezone() returns a TimezoneInfo object
-    // which has a property 'id' or 'identifier'
-    final timezoneInfo = await FlutterTimezone.getLocalTimezone();
-    // According to current documentation, it's often a String directly or has .id
-    // But error said it's TimezoneInfo. We try 'id' or cast to dynamic to check.
-    final String currentTimeZone = (timezoneInfo as dynamic).id ?? (timezoneInfo as dynamic).name ?? 'UTC';
+    // In flutter_timezone ^5.0.2, getLocalTimezone() returns a String.
+    // If you get a type error, it might be due to a specific version behavior.
+    // We use dynamic here to safely handle the return value.
+    final dynamic timezoneValue = await FlutterTimezone.getLocalTimezone();
+    String currentTimeZone;
+    
+    if (timezoneValue is String) {
+      currentTimeZone = timezoneValue;
+    } else {
+      // Fallback for cases where it might return a TimezoneInfo object
+      currentTimeZone = timezoneValue.toString();
+    }
     
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
     
